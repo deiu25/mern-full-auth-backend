@@ -11,7 +11,6 @@ const crypto = require("crypto");
 const Cryptr = require("cryptr");
 const { OAuth2Client } = require("google-auth-library");
 
-
 const cryptr = new Cryptr(process.env.CRYPTR_KEY);
 
 const client = new OAuth2Client(process.env.CLIENT_ID);
@@ -117,6 +116,7 @@ const registerUser = asyncHandler(async (req, res) => {
     if (!allowedAgent) {
       // Generate 6 digit code
       const loginCode = Math.floor(100000 + Math.random() * 900000);
+      console.log(loginCode);
   
       // Encrypt login code before saving to DB
       const encryptedLoginCode = cryptr.encrypt(loginCode.toString());
@@ -210,36 +210,36 @@ const getUser = asyncHandler(async (req, res) => {
 
 // Update User
 const updateUser = asyncHandler(async (req, res) => {
-    const user = await User.findById(req.user._id);
-  
-    if (user) {
-      const { firstname, lastname, email, phone, bio, photo, role, isVerified } = user;
-  
-      user.email = email;
-      user.firstname = req.body.firstname || firstname;
-      user.lastname = req.body.lastname || lastname;
-      user.phone = req.body.phone || phone;
-      user.bio = req.body.bio || bio;
-      user.photo = req.body.photo || photo;
-  
-      const updatedUser = await user.save();
-  
-      res.status(200).json({
-        _id: updatedUser._id,
-        firstname: updatedUser.firstname,
-        lastname: updatedUser.lastname,
-        email: updatedUser.email,
-        phone: updatedUser.phone,
-        bio: updatedUser.bio,
-        photo: updatedUser.photo,
-        role: updatedUser.role,
-        isVerified: updatedUser.isVerified,
-      });
-    } else {
-      res.status(404);
-      throw new Error("User not found");
-    }
-  });
+  const user = await User.findById(req.user._id);
+
+  if (user) {
+    const { firstname, lastname, email, phone, bio, photo, role, isVerified } = user;
+
+    user.email = email;
+    user.firstname = req.body.firstname || firstname;
+    user.lastname = req.body.lastname || lastname;
+    user.phone = req.body.phone || phone;
+    user.bio = req.body.bio || bio;
+    user.photo = req.file ? req.file.path : photo; // If new photo was uploaded, save new url
+
+    const updatedUser = await user.save();
+
+    res.status(200).json({
+      _id: updatedUser._id,
+      firstname: updatedUser.firstname,
+      lastname: updatedUser.lastname,
+      email: updatedUser.email,
+      phone: updatedUser.phone,
+      bio: updatedUser.bio,
+      photo: updatedUser.photo,
+      role: updatedUser.role,
+      isVerified: updatedUser.isVerified,
+    });
+  } else {
+    res.status(404);
+    throw new Error("User not found");
+  }
+});
 
 // Delete User
 const deleteUser = asyncHandler(async (req, res) => {
@@ -449,6 +449,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
 
   //   Create Verification Token and Save
   const resetToken = crypto.randomBytes(32).toString("hex") + user._id;
+  console.log(resetToken);
 
   // Hash token and save
   const hashedToken = hashToken(resetToken);
@@ -492,6 +493,8 @@ const forgotPassword = asyncHandler(async (req, res) => {
 const resetPassword = asyncHandler(async (req, res) => {
   const { resetToken } = req.params;
   const { password } = req.body;
+  console.log(resetToken);
+  console.log(password);
 
   const hashedToken = hashToken(resetToken);
 
@@ -670,7 +673,9 @@ const loginWithGoogle = asyncHandler(async (req, res) => {
   });
 
   const payload = ticket.getPayload();
-  const { firstname, lastname, email, picture, sub } = payload;
+  const { given_name, family_name, email, picture, sub } = payload;
+  const firstname = given_name;
+  const lastname = family_name || "N/A";
   const password = Date.now() + sub;
 
   // Get UserAgent

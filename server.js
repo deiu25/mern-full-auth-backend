@@ -1,10 +1,8 @@
 require("dotenv").config();
 
-const PORT = process.env.PORT || 5000;
-
-const app = require('./app');
 const connectDatabase = require('./config/database');
-const errorHandler = require("./middleware/errorMiddleware");
+const app = require('./app');
+const PORT = process.env.PORT || 5000;
 
 //Handle Uncaught exceptions
 process.on('uncaughtException', err => {
@@ -32,5 +30,3 @@ connectDatabase().then(() => {
   console.log(`Could not connect to database: ${error}`);
 });
 
-// Error Handler Middleware
-app.use(errorHandler);

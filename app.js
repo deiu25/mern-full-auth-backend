@@ -1,12 +1,10 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
-const errorMiddleware = require('./middleware/errorMiddleware');
 const userRoute = require("./routes/userRoute");
 const cors = require('cors');
-require("dotenv").config();
+const errorHandler = require("./middleware/errorMiddleware");
 
-// Inițializare instanță Express
 const app = express();
 
 app.use(express.json());
@@ -26,6 +24,6 @@ app.get("/", (req, res) => {
   res.send("Home Page");
 });
 
-app.use(errorMiddleware);
+app.use(errorHandler);
 
 module.exports = app;
