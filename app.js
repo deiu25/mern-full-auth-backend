@@ -13,7 +13,7 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(
   cors({
-    origin: "https://auth.syntaxseeker.com", 
+    origin: ["http://localhost:3000", "https://syntaxseeker-auth.vercel.app"], 
     credentials: true,
   })
 );
