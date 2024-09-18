@@ -13,7 +13,10 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(
   cors({
-    origin: ["http://localhost:3000", /\.vercel\.app$/],
+    origin: [
+      "https://syntaxseeker-auth.vercel.app",
+      "https://syntaxseeker-auth-7snz-ehibf6gv3-deiu25s-projects.vercel.app" 
+    ],
     credentials: true,
   })
 );
